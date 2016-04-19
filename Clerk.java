@@ -20,7 +20,7 @@ public class Clerk extends Thread{
 	public void run()
 	{
 		msg("has been made");
-		while(mainThread.stillLiveAdventurer())
+		while(mainThread.checkForLivingThreads())
 		{
 			helpCustomers();	
 		}
@@ -33,7 +33,11 @@ public class Clerk extends Thread{
 		if(mainThread.isShopLineEmpty()!=true)
 		{
 			msg("is about to help a waiting customer");
+			try
+			{
 			mainThread.getNextInShopLine().getAssistance();
+			}
+			catch(Exception e){}
 			msg("has helped the customer");
 			
 		}

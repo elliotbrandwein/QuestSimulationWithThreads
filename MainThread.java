@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -8,14 +9,14 @@ import java.util.Stack;
 public class MainThread extends Thread{
 	private Clerk[] clerks;
 	private Adventurer[] adventurers;
-	private Boolean[] aliveAdventurers;
+	private Boolean[] adventurersThatStillNeedTreasure;
 	private Boolean[] need_assistance;
 	private LinkedQueue<Adventurer> shopLine = new LinkedQueue<Adventurer>();
 	private Dragon dragon;
 	private boolean shopLineLock=false;
-	private int num_adv=6;
+	private int num_adv=0;
 	private int num_clerk=2;
-	private int num_fortuneSize=5;
+	private int num_fortuneSize=0;
 	
 	// the run method calls the start method on all the other threads the main thread has created
 	public void run()
@@ -26,17 +27,21 @@ public class MainThread extends Thread{
 		return;
 	}
 	// this is the constructor for the Main class
-	public MainThread() throws Exception
+	public MainThread(int adv_num, int fortune_size) throws Exception
 	{ 
-		//first we get the input from the user on how many clerks and adventurers we will be making	
-		num_adv=getInput("how many adventurers do you want?");
-		num_clerk=getInput("how many clerks do you want?");
-		num_fortuneSize=getInput("whats the fortune size?");
+		//num_adv=getInput("how many adventurers do you want?",0);
+		//num_clerk=getInput("how many clerks do you want?",1);
+		//num_fortuneSize=getInput("whats the fortune size?",2);
+		
+		num_adv=adv_num;
+		num_fortuneSize=fortune_size;
+		
+		
 		
 		// next we make the arrays where we will store are the clerk and adventurer threads
 		clerks= new Clerk[num_clerk];
 		adventurers = new Adventurer[num_adv];
-		aliveAdventurers= new Boolean[num_adv];
+		adventurersThatStillNeedTreasure= new Boolean[num_adv];
 		need_assistance = new Boolean[num_adv];
 		 
 		/* now we make all the clerks,adventurers and the dragon
@@ -45,7 +50,7 @@ public class MainThread extends Thread{
 		for(int i =0; i<num_adv;i++)
 		{
 			adventurers[i]= new Adventurer(i,num_fortuneSize,this);
-			aliveAdventurers[i]=true;
+			adventurersThatStillNeedTreasure[i]=true;
 			need_assistance[i]=false;
 		}
 		for(int i =0; i<num_clerk;i++)
@@ -58,38 +63,16 @@ public class MainThread extends Thread{
 	public void initThreads()
 	{
 		System.out.println("we are in the initThreads method");	
-		for(int i=0;i<num_clerk;i++)
-		{
-			clerks[i].start();
-		}
+		
 		for(int i=0; i<num_adv;i++)
 		{
 			adventurers[i].start();
 		}
-		dragon.start();
-	}
-	
-	// this method takes in the user input for how many clerks they want or how many adventurers they want
-	private int getInput(String question) throws IOException
-	{
-		Scanner sc = new Scanner(System.in);
-		boolean getInput=true;
-		int output=0;
-		while(getInput)
+		for(int i=0;i<num_clerk;i++)
 		{
-			System.out.print(question);
-		    try
-		    {
-		    	output=sc.nextInt();
-		    }
-		    catch (NumberFormatException e)
-		    {
-		    	System.out.println("that wasn't a number, try that again");
-		    }
-		    if(output<1) System.out.println("that was too low of a number"+"\n");
-			else getInput=false;
+			clerks[i].start();
 		}
-		return output;
+		dragon.start();
 	}
 	
 	public boolean needAssistance(int id){
@@ -142,24 +125,30 @@ public class MainThread extends Thread{
 		}
 		//shopUnlock();
 	}
+	public synchronized boolean checkForLivingThreads(){
+		for(int i=0;i<num_adv;i++){
+			if(adventurers[i].isAlive()) return true;
+		}
+		return false;
+	}
 	public synchronized boolean stillLiveAdventurer()
 	{
 		
 		for(int i=0; i<num_adv;i++)
 		{
-			if (aliveAdventurers[i]==true)return true;
+			if (adventurersThatStillNeedTreasure[i]==true)return true;
 		}
 		return false;
 	}
 	 public void setAliveAdventurers (int i)
 	{
-		aliveAdventurers[i]=false;
+		 adventurersThatStillNeedTreasure[i]=false;
 	}
 	public synchronized Adventurer getAliveAdventurer()
 	{
 		for(int i=1;i<num_adv;i++)
 		{
-		if(aliveAdventurers[i]) return adventurers[i];	
+		if(adventurersThatStillNeedTreasure[i]) return adventurers[i];	
 		}
 		return adventurers[0];
 	}
@@ -227,5 +216,24 @@ public class MainThread extends Thread{
 	{
 		playerJustLost=x;
 	}
+	
+	// this method takes in the user input for how many clerks they want or how many adventurers they want
+	private int getInput(String question, int version) throws IOException
+	{
+		Scanner sc = new Scanner(System.in);
+		boolean getInput=true;
+		int output=0;
+		while(getInput)
+		{
+			System.out.print(question);
+		   
+		    	output=sc.nextInt();
+		    if(output<1) System.out.println("that was too low of a number"+"\n");
+			else getInput=false;
+		}
+		return output;
+	}
+	
+	
 	*/
 }

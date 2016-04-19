@@ -21,7 +21,7 @@ public static long time = System.currentTimeMillis();
 	public void run()
 	{
 		msg("has been made");
-		while(mainThread.stillLiveAdventurer())
+		while(mainThread.checkForLivingThreads())
 		{
 	
 		}

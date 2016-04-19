@@ -72,7 +72,6 @@ public class Adventurer extends Thread {
 		try {
 			joinAdventurers();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		msg("is done "+"\n");
