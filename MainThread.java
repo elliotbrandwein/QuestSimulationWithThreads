@@ -9,6 +9,7 @@ public class MainThread extends Thread{
 	private Clerk[] clerks;
 	private Adventurer[] adventurers;
 	private Boolean[] aliveAdventurers;
+	private Boolean[] need_assistance;
 	private LinkedQueue<Adventurer> shopLine = new LinkedQueue<Adventurer>();
 	private Dragon dragon;
 	private boolean shopLineLock=false;
@@ -30,11 +31,13 @@ public class MainThread extends Thread{
 		//first we get the input from the user on how many clerks and adventurers we will be making	
 		num_adv=getInput("how many adventurers do you want?");
 		num_clerk=getInput("how many clerks do you want?");
+		num_fortuneSize=getInput("whats the fortune size?");
 		
 		// next we make the arrays where we will store are the clerk and adventurer threads
 		clerks= new Clerk[num_clerk];
 		adventurers = new Adventurer[num_adv];
 		aliveAdventurers= new Boolean[num_adv];
+		need_assistance = new Boolean[num_adv];
 		 
 		/* now we make all the clerks,adventurers and the dragon
 		 * the shared variables are stored in this class, so we pass it to each thread we make	 
@@ -43,6 +46,7 @@ public class MainThread extends Thread{
 		{
 			adventurers[i]= new Adventurer(i,num_fortuneSize,this);
 			aliveAdventurers[i]=true;
+			need_assistance[i]=false;
 		}
 		for(int i =0; i<num_clerk;i++)
 		{
@@ -88,35 +92,55 @@ public class MainThread extends Thread{
 		return output;
 	}
 	
+	public boolean needAssistance(int id){
+		boolean x;
+		synchronized(this){
+			x=need_assistance[id];
+		}
+		return x;
+	}
 	
-	public synchronized boolean  isShopLineEmpty()
+	public void setAssistance(int id)
 	{
-		shopLock();
-		boolean x = shopLine.isEmpty();
-		shopUnlock();
+		synchronized(this)
+		{
+		need_assistance[id]=true;
+		}
+	}
+	public void gotAssitance(int id){
+		synchronized(this)
+		{
+			need_assistance[id]=false;
+		}
+	}
+	public boolean  isShopLineEmpty()
+	{
+		boolean x;
+		synchronized(this)
+		{
+		 x = shopLine.isEmpty();
+		}
 		return x;
 	}
-	private synchronized void shopUnlock()
+	public  Adventurer getNextInShopLine()
 	{
-		shopLineLock=false;
-	}
-	private synchronized void shopLock()
-	{
-	 while(shopLineLock){}
-	 shopLineLock=true;
-	}
-	public synchronized Adventurer getNextInShopLine()
-	{
-		shopLock();
-		Adventurer x= shopLine.dequeue();
-		shopUnlock();
+		//shopLock();
+		Adventurer x;
+		synchronized(this)
+		{
+			x= shopLine.dequeue();
+		}
+		//shopUnlock();
 		return x;
 	}
-	public synchronized void joinShopLine(Adventurer adv){
-		shopLock();
-		shopLine.enqueue(adv);
-		System.out.println(adv.getName() +" has entered the shop line");
-		shopUnlock();
+	public  void joinShopLine(Adventurer adv){
+		//shopLock();
+		synchronized(this)
+		{
+			shopLine.enqueue(adv);
+			System.out.println(adv.getName() +" has entered the shop line");
+		}
+		//shopUnlock();
 	}
 	public synchronized boolean stillLiveAdventurer()
 	{
@@ -139,8 +163,18 @@ public class MainThread extends Thread{
 		}
 		return adventurers[0];
 	}
-	
 	/*
+	 *  
+	private synchronized void shopUnlock()
+	{
+		shopLineLock=false;
+	}
+	private synchronized void shopLock()
+	{
+	 while(shopLineLock){}
+	 shopLineLock=true;
+	}
+	
 	synchronized public void addToDragonLine(Adventurer adventurer)
 	{
 		dragonLock();

@@ -25,7 +25,7 @@ public static long time = System.currentTimeMillis();
 		{
 	
 		}
-		msg("is done");
+		msg("is done"+"\n");
 	}
 /*	
 	private Adventurer pickPlayer()

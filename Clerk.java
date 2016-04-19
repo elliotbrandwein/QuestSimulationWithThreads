@@ -24,7 +24,7 @@ public class Clerk extends Thread{
 		{
 			helpCustomers();	
 		}
-		msg("has terminated because there are no more adventurers");
+		msg("has terminated because there are no more adventurers"+"\n");
 	}
 		
 
@@ -34,6 +34,7 @@ public class Clerk extends Thread{
 		{
 			msg("is about to help a waiting customer");
 			mainThread.getNextInShopLine().getAssistance();
+			msg("has helped the customer");
 			
 		}
 	    
