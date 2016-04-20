@@ -15,14 +15,15 @@ public class Adventurer extends Thread {
 	private static ArrayList<Boolean> need_assistance = new ArrayList<Boolean>();
 	private MainThread mainThread;
 	private boolean isWaitingForDragon=false;
+	private int errorCheck=0;
 	
 	//constructor will set the fortuneSize,adventurerId,stones,rings,chains,earring,mainThread, and need_assitance variables
 	public Adventurer(int id, int fortuneSize, MainThread parentThread) throws Exception
 	{
-		stones=getRandomInt()%1;
-		rings=getRandomInt()%1;
-		chains=getRandomInt()%1;
-		earrings=getRandomInt()%1;
+		stones=getRandomInt()%4;
+		rings=getRandomInt()%4;
+		chains=getRandomInt()%4;
+		earrings=getRandomInt()%4;
 		adventurerId=id;				    
 		need_assistance.add(false);// The assistance array initializes to false
 		setName("Adventurer-"+(id+1));
@@ -71,7 +72,6 @@ public class Adventurer extends Thread {
 		try {
 			joinAdventurers();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		msg("is done "+"\n");
@@ -81,6 +81,7 @@ public class Adventurer extends Thread {
 	{
 		if(mainThread.stillLiveAdventurer())
 		{
+			msg("has joined another adventurer"+"\n");
 			mainThread.getAliveAdventurer().join();
 		}
 	}
@@ -122,12 +123,18 @@ public class Adventurer extends Thread {
 		need_assistance.set(adventurerId, true);
 		mainThread.joinShopLine(this);
 		msg("is now busy-waiting");
-		while(need_assistance.get(adventurerId)){}		// this is the busy-wait, waiting for the clerk at the shop
+		while(need_assistance.get(adventurerId)){
+			errorCheck++;
+			if(errorCheck%1000000==0)msg("is stuck in the busy wait");
+		}		// this is the busy-wait, waiting for the clerk at the shop
 		msg("has got help");
 		makeMagicItems();
 		msg("has left the shop");
 	}
-	public void getAssistance(){ need_assistance.set(adventurerId,false);}
+	public void getAssistance()
+	{ 
+		need_assistance.set(adventurerId,false);
+	}
 	
 	private void makeMagicItems()
 	{
