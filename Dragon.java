@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-
+import java.util.Random;
 public class Dragon extends Thread {
 public static long time = System.currentTimeMillis();
 	
@@ -7,6 +7,7 @@ public static long time = System.currentTimeMillis();
 	private Adventurer playedLast;
 	private Adventurer topPriorityAdventurer;
 	private boolean rematch =false;
+	int x=0;
 	
 	public void msg(String m)
 	{
@@ -22,34 +23,43 @@ public static long time = System.currentTimeMillis();
 	{
 		msg("has been made");
 		while(mainThread.checkForLivingThreads())
-		{
+		{	
+			if(mainThread.checkDragonLine())
+			{
+				topPriorityAdventurer=mainThread.pickPlayer();
+				// This simulates playing the game with the adventurer.
+				topPriorityAdventurer.isNoLongerWaitingForDragon();
+				topPriorityAdventurer.interrupt();	
+
+			}
 			
 		}
 		msg(" has terminated because there are no more adventurers"+"\n");
 	}
-/*	
-	private Adventurer pickPlayer()
+	private int getRandomInt()
 	{
-		{
-			ArrayList<Adventurer> gameLine = mainThread.getDragonLine();
-			int lineLength = gameLine.size();
-			for(int i=0;i<lineLength; i++)
+		Random randStone = new Random();
+		int value = ((randStone.nextInt()));
+		return value;
+	}
+	private boolean playGame()
+	{
+		boolean game=true;
+		boolean output=true;
+		while(game){
+			int dragonDiceRoll=(getRandomInt()%6)+1;
+			int humanDiceRoll =(getRandomInt()%6)+1;
+			if(dragonDiceRoll>humanDiceRoll)
 			{
-				if(i==0)topPriorityAdventurer=gameLine.get(i);
-				else if (gameLine.get(i).getPriority()>topPriorityAdventurer.getPriority() && gameLine.get(i).getIsWaitingForDragon())
-				{
-					topPriorityAdventurer=gameLine.get(i);
-				}
+				game=false;
+				output=false;
 			}
-			playedLast=topPriorityAdventurer;
-			return topPriorityAdventurer;
+			if(dragonDiceRoll>humanDiceRoll)
+			{
+				game=false;
+				output=true;
+			}
 		}
+		return output;
 	}
-
-	private void playGame()
-	{
-		Adventurer player = pickPlayer();
-		player.interrupt();		
-	}
-	*/
 }

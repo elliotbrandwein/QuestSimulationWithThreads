@@ -32,13 +32,13 @@ public class Clerk extends Thread{
 	private void helpCustomers()
 	{
 		synchronized(shopObject){
-		if(mainThread.isShopLineEmpty()!=true)
-		{
-			msg("is about to help a waiting customer");
-			mainThread.getNextInShopLine().getAssistance();
-			msg("has helped the customer");
-			
-		}
+			if(mainThread.isShopLineEmpty()!=true)
+			{
+				msg("is about to help a waiting customer");
+				mainThread.getNextInShopLine().getAssistance();
+				msg("has helped the customer");
+				
+			}
 		}
 	}
 }

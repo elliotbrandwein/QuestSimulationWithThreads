@@ -5,7 +5,7 @@ import java.util.Random;
 public class Adventurer extends Thread {
 	// the variable list that each Adventurer needs
 	public static long time = System.currentTimeMillis();
-	private int foretuneSize = 5;
+	private int fortuneSize = 5;
 	private int adventurerId;
 	private int stones;
 	private int rings;
@@ -30,6 +30,9 @@ public class Adventurer extends Thread {
 		setfortuneSize(fortuneSize);
 		mainThread= parentThread;
 	}
+	public Adventurer() {
+		// TODO Auto-generated constructor stub
+	}
 	private int getRandomInt()
 	{
 		Random randStone = new Random();
@@ -44,7 +47,7 @@ public class Adventurer extends Thread {
 			Exception e = new Exception("bad fortune size");
 			throw e;
 		}
-		else foretuneSize=fortune_Size;
+		else fortuneSize=fortune_Size;
 	}
 
 	public void msg(String m)
@@ -55,19 +58,17 @@ public class Adventurer extends Thread {
 	public void run()
 	{
 		msg("has started");
-		while(checkFortune()){	
+		while(checkFortune())
+		{	
 			if(checkForCraftableItems())
 			{
 				goToShop();
 				shop();
 			}
-			//goToDragonsCave();
-			stones=10;
-			rings=10;
-			chains=10;
-			earrings=10;
+			goToDragonsCave();
+			yield();
 		}
-		// write method for checking if there are other adventurers and then join them if they exist
+		
 		mainThread.setAliveAdventurers(adventurerId);
 		try {
 			joinAdventurers();
@@ -77,6 +78,27 @@ public class Adventurer extends Thread {
 		msg("is done "+"\n");
 	}
 	
+	private void goToDragonsCave()
+	{
+		isWaitingForDragon=true;
+		msg("has gone to the dragon's cave ");
+		try {
+			sleep(100000);
+		} catch (InterruptedException e) {
+			msg("has woke");
+			giveTreasure(this);	// simulates playing the dragon for now
+		}
+		
+		
+	// trying to use the if with the isInterttuped method didnt seem to work, so I run the the code in the catch above
+	/*	if(isInterrupted())
+		{
+			msg("has woke");
+			giveTreasure(this);	// simulates playing the dragon for now
+		}
+	*/	
+		
+	}
 	private synchronized void joinAdventurers() throws InterruptedException
 	{
 		if(mainThread.stillLiveAdventurer())
@@ -87,16 +109,17 @@ public class Adventurer extends Thread {
 	}
 	private boolean checkFortune()
 	{
-		if(magicalRings>=foretuneSize && magicalNecklases>=foretuneSize && magicalEarrings>=foretuneSize) return false;
+		if(magicalRings>=fortuneSize && magicalNecklases>=fortuneSize && magicalEarrings>=fortuneSize) return false;
 		return true;
 	}
 	
+	//this will only return true if the adventurer can craft treasure for something that he needs more of
 	private boolean checkForCraftableItems()
 	{
-		if(stones>0 && rings>0) return true;			// he can create a magic ring
-		else if (stones>0 && chains>0) return true;		// he can create a magic necklace
-		else if(stones>1 && earrings>1)return true;		// he can create a magic pair of earrings
-		else return false;								// no items could be crafted
+		if(stones>0 && rings>0 && magicalRings<fortuneSize) return true;	
+		else if (stones>0 && chains>0 && magicalNecklases<fortuneSize) return true;		
+		else if(stones>1 && earrings>1  && magicalEarrings<fortuneSize)return true;
+		else return false;						
 	}
 	
 	
@@ -140,21 +163,21 @@ public class Adventurer extends Thread {
 	{
 		while(checkForCraftableItems())
 		{
-			if(stones>0 && rings>0)
+			if(stones>0 && rings>0 && magicalRings<fortuneSize)
 			{
 				magicalRings++;
 				rings--;
 				stones--;
 				msg("now has "+magicalRings+" magical ring(s)");
 			}
-			if(stones>0 && chains>0)
+			if(stones>0 && chains>0 && magicalNecklases<fortuneSize)
 			{
 				stones--;
 				chains--;
 				magicalNecklases++;
 				msg("now has "+magicalNecklases+" magical necklase(s)");
 			}
-		    if(earrings>1 && stones>1)
+		    if(earrings>1 && stones>1 && magicalEarrings<fortuneSize)
 			{
 				earrings=earrings-2;
 				stones=stones-2;
@@ -164,7 +187,7 @@ public class Adventurer extends Thread {
 		}
 	}
 	
-	private void givetreasure(Adventurer adventurer)
+	private void giveTreasure(Adventurer adventurer)
 	{
 		int prize=getRandomInt()%4;
 		switch(prize)
@@ -179,5 +202,13 @@ public class Adventurer extends Thread {
 		break;
 		}
 		
+	}
+	public boolean isWaitingForDragon()
+	{
+		return isWaitingForDragon;
+	}
+	public void isNoLongerWaitingForDragon()
+	{
+		isWaitingForDragon=false;
 	}
 }
