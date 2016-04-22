@@ -1,5 +1,5 @@
 import java.util.LinkedList;
-public class LinkedQueue<AnyType> implements Queue<AnyType>
+public class LinkedQueue<AnyType> 
 {
 private LinkedList<AnyType> queue;
 public LinkedQueue() { queue = new LinkedList<>(); }

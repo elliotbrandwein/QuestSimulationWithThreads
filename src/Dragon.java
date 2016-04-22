@@ -1,12 +1,10 @@
-import java.util.ArrayList;
+import java.util.Random;
+public class Dragon extends Thread
+{
 
-public class Dragon extends Thread {
-public static long time = System.currentTimeMillis();
-	
+	public static long time = System.currentTimeMillis();
 	private MainThread mainThread;
-	private Adventurer playedLast;
 	private Adventurer topPriorityAdventurer;
-	private boolean rematch =false;
 	
 	public void msg(String m)
 	{
@@ -21,34 +19,60 @@ public static long time = System.currentTimeMillis();
 	public void run()
 	{
 		msg("has been made");
-		while(mainThread.stillLiveAdventurer())
-		{
-	
-		}
-	}
-/*	
-	private Adventurer pickPlayer()
-	{
-		{
-			ArrayList<Adventurer> gameLine = mainThread.getDragonLine();
-			int lineLength = gameLine.size();
-			for(int i=0;i<lineLength; i++)
+		while(mainThread.checkForLivingThreads())
+		{	
+			if(mainThread.checkDragonLine())
 			{
-				if(i==0)topPriorityAdventurer=gameLine.get(i);
-				else if (gameLine.get(i).getPriority()>topPriorityAdventurer.getPriority() && gameLine.get(i).getIsWaitingForDragon())
+				topPriorityAdventurer=mainThread.pickPlayer();
+				// This simulates playing the game with the adventurer.
+				if(playGame())
 				{
-					topPriorityAdventurer=gameLine.get(i);
+					playerHasWon(topPriorityAdventurer);
 				}
-			}
-			playedLast=topPriorityAdventurer;
-			return topPriorityAdventurer;
-		}
-	}
+				else
+				{
+					// if the player just lost then we set their priority to max and pick that player again. 
+					topPriorityAdventurer.setPriority(MAX_PRIORITY);
+					topPriorityAdventurer=mainThread.pickPlayer();
+					if(playGame())playerHasWon(topPriorityAdventurer);
+				}
 
-	private void playGame()
-	{
-		Adventurer player = pickPlayer();
-		player.interrupt();		
+			}
+			
+		}
+		msg(" has terminated because there are no more adventurers"+"\n");
 	}
-	*/
+	private void playerHasWon(Adventurer adv)
+	{
+		msg("has lost to player"+adv.getName());
+		adv.setPriority(NORM_PRIORITY);
+		adv.isNoLongerWaitingForDragon();
+		adv.interrupt();	
+	}
+	private int getRandomInt()
+	{
+		Random randStone = new Random();
+		int value = ((randStone.nextInt()));
+		return value;
+	}
+	private boolean playGame()
+	{
+		boolean game=true;
+		boolean output=true;
+		while(game){
+			int dragonDiceRoll=(getRandomInt()%6)+1;
+			int humanDiceRoll =(getRandomInt()%6)+1;
+			if(dragonDiceRoll>humanDiceRoll)
+			{
+				game=false;
+				output=false;
+			}
+			if(dragonDiceRoll>humanDiceRoll)
+			{
+				game=false;
+				output=true;
+			}
+		}
+		return output;
+	}
 }
